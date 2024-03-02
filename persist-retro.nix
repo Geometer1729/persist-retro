@@ -61,18 +61,18 @@ let
   scriptFor = ms:
     ''
       try_init_with_existing(){
-        source=$1
+        src=$1
         dest=$2
         # If the directory doesn't exist in persistence
         # and already exists in the target
         # initialize it by moving the existing directory
-        if [ -e "$source" ] && ! [ -e "$dest" ]
+        if [ -e "$src" ] && ! [ -e "$dest" ]
         then
           # ensure parents exist
           mkdir -p "$dest"
           # rmdir fails if directory not empty so this is fairly safe
           rmdir "$dest"
-          mv "$source" "$dest"
+          mv "$src" "$dest"
         fi
       }
     '' +
