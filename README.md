@@ -3,8 +3,10 @@ Retroactively persist directories with home-manager + impermanence
 
 
 persist-retro works by adding a step during activation of home-manager
-in which missing directories configured to be persisted by impermanence
-are initialized by the existing directory from the root filesystem if it exists.
+in which directories, which have been configured to be persisted by impermanence
+but do not yet exist in the persistant directory,
+are initialized by moving the coresponding directory from the root filesystem, if it exists,
+into the persistant filesystem.
 
 Usage is similar to impermanence
 ```nix
@@ -16,6 +18,7 @@ Usage is similar to impermanence
 ```
 
 # Missing features
-- [ ] work with non-string etries in the directories list
+- [X] Work with non-string etries in the directories list
+- [ ] Work with symlinks
 - [ ] Support files with home-manager
 - [ ] Work with the impermanence nixosModule

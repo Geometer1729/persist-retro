@@ -6,8 +6,16 @@ let
      (builtins.mapAttrs
       (mount: opts:
        builtins.map
-       (dirPath : {inherit mount dirPath;})
-       (opts.directories ++ opts.files)
+       (entry :
+        let dirPath =
+          if builtins.isString entry
+            then entry
+            else entry.directory;
+        in {inherit mount dirPath;}
+       )
+       (builtins.filter
+        (entry: builtins.isString entry || entry.method == "bindfs")
+        opts.directories)
        ) config.home.persistence
       ));
 in
