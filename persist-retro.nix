@@ -18,20 +18,29 @@ let
         opts.directories)
        ) config.home.persistence
       ));
-in
-{
-  home.activation.persist-retro =
-    lib.hm.dag.entryBetween
-    # before
-    [ "createAndMountPersistentStoragePaths"
-      "createTargetFileDirectories"
-      "linkGeneration"
-    ]
-    # after
-    [ "unmountPersistentStoragePaths"
-      "runUnmountPersistentStoragePaths"
-    ]
-    (
+  links =
+    builtins.concatLists
+    (builtins.attrValues
+     (builtins.mapAttrs
+      (mount: opts:
+       builtins.map
+       (entry :
+        let dirPath =
+          if builtins.isString entry
+            then entry
+            else entry.directory;
+        in {inherit mount dirPath;}
+       )
+       ((builtins.filter
+        (entry: builtins.isAttrs entry && entry.method == "symlink")
+        opts.directories
+        )
+        ++ opts.files
+       )
+       )
+      config.home.persistence
+      ));
+  scriptFor = ms :
     ''
     try_init_with_existing(){
       source=$1
@@ -57,7 +66,30 @@ in
             in
          "try_init_with_existing ${source} ${dest}\n"
          )
-        mounts
-      )
-    );
+        ms
+      );
+
+in
+{
+  home.activation = {
+    persist-retro =
+      lib.hm.dag.entryBetween
+      # before
+      [ "createAndMountPersistentStoragePaths"
+        "createTargetFileDirectories"
+        "linkGeneration"
+      ]
+      # after
+      [ "unmountPersistentStoragePaths"
+        "runUnmountPersistentStoragePaths"
+      ]
+      (scriptFor mounts)
+      ;
+    persist-retro-link-phase =
+      lib.hm.dag.entryBefore
+      [ "checkLinkTargets"
+      ]
+      (scriptFor links)
+      ;
+  };
 }

@@ -19,6 +19,6 @@ Usage is similar to impermanence
 
 # Missing features
 - [X] Work with non-string etries in the directories list
-- [ ] Work with symlinks
-- [ ] Support files with home-manager
+- [X] Work with symlinks
+- [X] Support files with home-manager
 - [ ] Work with the impermanence nixosModule
