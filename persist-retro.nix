@@ -1,50 +1,63 @@
 { config, lib, ... }:
 let
-  mounts =
+  allMounts =
     builtins.concatLists
       (builtins.attrValues
         (builtins.mapAttrs
-          (mount: opts:
-            builtins.map
+          (mount_path: opts:
+            (builtins.map
               (entry:
-                let
-                  dirPath =
-                    if builtins.isString entry
-                    then entry
-                    else entry.directory;
-                in
-                { inherit mount dirPath; }
+                {
+                  inherit mount_path entry;
+                  type = "dir";
+                }
               )
-              (builtins.filter
-                (entry: builtins.isString entry || entry.method == "bindfs")
-                opts.directories)
+              opts.directories)
+            ++
+            (builtins.map
+              (entry:
+                {
+                  inherit mount_path entry;
+                  type = "file";
+                }
+              )
+              opts.files)
           )
           config.home.persistence
         ));
-  links =
-    builtins.concatLists
-      (builtins.attrValues
-        (builtins.mapAttrs
-          (mount: opts:
-            builtins.map
-              (entry:
-                let
-                  dirPath =
-                    if builtins.isString entry
-                    then entry
-                    else entry.directory;
-                in
-                { inherit mount dirPath; }
-              )
-              ((builtins.filter
-                (entry: builtins.isAttrs entry && entry.method == "symlink")
-                opts.directories
-              )
-              ++ opts.files
-              )
-          )
-          config.home.persistence
-        ));
+  binds = builtins.filter builtins.isAttrs # remove nulls
+    (
+      builtins.map
+        ({ mount_path, type, entry }:
+          if type == "dir"
+          then
+            (if builtins.isString entry
+            then { inherit mount_path; root_path = entry; }
+            else
+              (if entry.method == "bindfs"
+              then { inherit mount_path; root_path = entry.directory; }
+              else null))
+          else null
+        )
+        allMounts);
+  links = builtins.filter builtins.isAttrs # remove nulls
+    (builtins.map
+      ({ mount_path, type, entry }:
+        if type == "dir"
+        then
+          (if builtins.isAttrs entry && entry.method == "symlink"
+          then { inherit mount_path; root_path = entry.directory; }
+          else null)
+        else
+          {
+            inherit mount_path;
+            root_path =
+              if builtins.isString entry
+              then entry
+              else entry.file;
+          }
+      )
+      allMounts);
   scriptFor = ms:
     ''
       try_init_with_existing(){
@@ -65,10 +78,10 @@ let
     '' +
     lib.strings.concatStrings
       (builtins.map
-        ({ mount, dirPath }:
+        ({ mount_path, root_path }:
           let
-            dest = mount + "/" + dirPath;
-            source = dirPath;
+            dest = mount_path + "/" + root_path;
+            source = root_path;
           in
           "try_init_with_existing ${source} ${dest}\n"
         )
@@ -91,7 +104,7 @@ in
           "unmountPersistentStoragePaths"
           "runUnmountPersistentStoragePaths"
         ]
-        (scriptFor mounts)
+        (scriptFor binds)
     ;
     persist-retro-link-phase =
       lib.hm.dag.entryBefore

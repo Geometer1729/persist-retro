@@ -1,7 +1,7 @@
 {
   description = "Retroactively persist directories with home-manager + impermanence";
 
-  outputs = {...}: {
+  outputs = { ... }: {
     nixosModules.home-manager.persist-retro =
       import ./persist-retro.nix;
 
