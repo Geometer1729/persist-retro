@@ -6,23 +6,32 @@ let
       (builtins.attrValues
         (builtins.mapAttrs
           (mount_path: opts:
+            builtins.filter builtins.isAttrs
+            (
             (builtins.map
               (entry:
+                if entry.dirPath == entry.directory && entry.persistentStoragePath == mount_path
+                then
                 {
                   inherit mount_path;
                   root_path = entry.dirPath;
                 }
+                else null
               )
               opts.directories)
             ++
             (builtins.map
               (entry:
+                if entry.filePath == entry.file && entry.persistentStoragePath == mount_path
+                then
                 {
                   inherit mount_path;
                   root_path = entry.filePath;
                 }
+                else null
               )
               opts.files)
+            )
           )
           config.environment.persistence
         ));

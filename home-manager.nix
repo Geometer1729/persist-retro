@@ -6,6 +6,9 @@ let
       (builtins.attrValues
         (builtins.mapAttrs
           (mount_path: opts:
+            if opts.removePrefixDirectory
+            then []
+            else
             (builtins.map
               (entry:
                 {

@@ -34,7 +34,7 @@ and in your nixos-configuration
 - [X] Work with symlinks
 - [X] Support files with home-manager
 - [X] Work with the impermanence nixosModule
-- [ ] disable when `persistentStoragePath` or `removePrefixDirectory` are set
+- [X] disable when `persistentStoragePath` or `removePrefixDirectory` are set
 - [ ] add option to disable persist-retro for individual persistennce entries
 - [ ] corectly support `persistentStoragePath`
 - [ ] corectly support `removePrefixDirectory`
