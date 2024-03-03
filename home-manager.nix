@@ -7,25 +7,25 @@ let
         (builtins.mapAttrs
           (mount_path: opts:
             if opts.removePrefixDirectory
-            then []
+            then [ ]
             else
-            (builtins.map
-              (entry:
-                {
-                  inherit mount_path entry;
-                  type = "dir";
-                }
-              )
-              opts.directories)
-            ++
-            (builtins.map
-              (entry:
-                {
-                  inherit mount_path entry;
-                  type = "file";
-                }
-              )
-              opts.files)
+              (builtins.map
+                (entry:
+                  {
+                    inherit mount_path entry;
+                    type = "dir";
+                  }
+                )
+                opts.directories)
+              ++
+              (builtins.map
+                (entry:
+                  {
+                    inherit mount_path entry;
+                    type = "file";
+                  }
+                )
+                opts.files)
           )
           config.home.persistence
         ));
