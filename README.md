@@ -1,5 +1,5 @@
 # persist-retro
-Retroactively persist directories with impermanence
+Retroactively persist directories with [impermanence](https://github.com/nix-community/impermanence)
 
 Persist-retro works by adding a step during activations of home-manager and nixos
 in which directories, which have been configured to be persisted by impermanence
