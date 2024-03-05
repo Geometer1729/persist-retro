@@ -66,17 +66,11 @@ in
 {
   home.activation = {
     persist-retro =
-      lib.hm.dag.entryBetween
+      lib.hm.dag.entryBefore
         # before
         [
           "createAndMountPersistentStoragePaths"
           "createTargetFileDirectories"
-          "linkGeneration"
-        ]
-        # after
-        [
-          "unmountPersistentStoragePaths"
-          "runUnmountPersistentStoragePaths"
         ]
         (scriptFor binds)
     ;

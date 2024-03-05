@@ -13,6 +13,7 @@ ms:
       mkdir -p "$dest"
       # rmdir fails if directory not empty so this is fairly safe
       rmdir "$dest"
+      echo moved "$src" to "$dest" at $(date) >> /var/log/persist-retro
       mv "$src" "$dest"
     fi
   }
